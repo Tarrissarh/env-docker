@@ -1,0 +1,48 @@
+version: "3.7"
+
+x-logging:
+  &logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "10"
+
+networks:
+  internal:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.221.0/28
+
+volumes:
+  api:
+    name: "${PROJECT_PREFIX}_api"
+    driver: local
+    driver_opts:
+      type: local
+      device: "../api"
+      o: bind
+
+services:
+  api:
+    container_name: "${PROJECT_PREFIX}_api"
+    restart: always
+    build:
+      dockerfile: ./php/Dockerfile
+      context: .
+      args:
+        - USER_NAME=${USER_NAME}
+        - USER_ID=${USER_ID}
+        - USER_GROUP_NAME=${USER_GROUP_NAME}
+        - USER_GROUP_ID=${USER_GROUP_ID}
+        - API_ENV=${API_ENV}
+        - API_DIR=${API_DIR}
+    volumes:
+      - api:${API_DIR}
+    ports:
+      - "${API_XDEBUG_PORT}:9000"
+    logging: *logging
+    networks:
+      - internal
+      -
