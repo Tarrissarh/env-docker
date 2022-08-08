@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add local ssl and documentation
 - Add gitlab CI/CD
 
+## [0.0.2] - 2022-08-05
+### Added
+- The basis of the local development environment has been created:
+  - node js 18 alpine
+  - mysql 8
+  - nginx 1.23 alpine
+  - redis 7.0 alpine
+  - mailcatcher
+
+### Changed
+- CHANGELOG.md
+- README.md
+- .env.sample
+- Modify dockerfile api (changed how extensions are installed)
+
+### Removed
+- postgres
+- node
+
+### Fixed
+- ...
+
 ## [0.0.1] - 2022-06-16
 ### Added
 - The basis of the local development environment has been created:

@@ -9,27 +9,39 @@ x-logging:
 
 networks:
   internal:
+    name: "${ENV_PREFIX}_network"
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 192.168.221.0/28
+        - subnet: "${ENV_IP_SUBNET}.0/24"
+          gateway: "${ENV_IP_SUBNET}.${ENV_PART_IP_GATEWAY}"
 
 volumes:
+  mysql:
+    name: "${ENV_PREFIX}_mysql"
+    driver: local
   api:
-    name: "${PROJECT_PREFIX}_api"
+    name: "${ENV_PREFIX}_api"
     driver: local
     driver_opts:
       type: local
-      device: "../api"
+      device: "${API_HOST_DIR}"
+      o: bind
+  app:
+    name: "${ENV_PREFIX}_app"
+    driver: local
+    driver_opts:
+      type: local
+      device: "${APP_HOST_DIR}"
       o: bind
 
 services:
   api:
-    container_name: "${PROJECT_PREFIX}_api"
+    container_name: "${ENV_PREFIX}_api"
     restart: always
     build:
-      dockerfile: ./php/Dockerfile
+      dockerfile: ./api/Dockerfile
       context: .
       args:
         - USER_NAME=${USER_NAME}
@@ -38,11 +50,91 @@ services:
         - USER_GROUP_ID=${USER_GROUP_ID}
         - API_ENV=${API_ENV}
         - API_DIR=${API_DIR}
+        - API_HOST_DIR=${API_HOST_DIR}
     volumes:
-      - api:${API_DIR}
+      - "api:${API_DIR}"
     ports:
-      - "${API_XDEBUG_PORT}:9000"
+      - "${PHP_XDEBUG_PORT}:9000"
     logging: *logging
     networks:
-      - internal
-      -
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.10"
+
+  server:
+    container_name: "${ENV_PREFIX}_server"
+    restart: always
+    build:
+      dockerfile: ./server/Dockerfile
+      context: .
+      args:
+        - USER_NAME=${USER_NAME}
+        - USER_ID=${USER_ID}
+        - USER_GROUP_NAME=${USER_GROUP_NAME}
+        - USER_GROUP_ID=${USER_GROUP_ID}
+        - ENV_PREFIX=${ENV_PREFIX}
+        - API_HOST=${API_HOST}
+        - APP_HOST=${APP_HOST}
+        - API_HOST_DIR=${API_HOST_DIR}
+        - APP_HOST_DIR=${APP_HOST_DIR}
+    depends_on:
+      - api
+    volumes:
+      - "api:${API_DIR}"
+      - "app:${APP_DIR}"
+    ports:
+      - "80:80"
+      - "443:443"
+    logging: *logging
+    networks:
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.20"
+
+  mysql:
+    container_name: "${ENV_PREFIX}_mysql"
+    restart: always
+    image: mysql:8.0
+    env_file:
+      - .env
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - "mysql:/var/lib/mysql"
+    logging: *logging
+    networks:
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.30"
+
+  app:
+    container_name: "${ENV_PREFIX}_app"
+    restart: 'no'
+    build:
+      dockerfile: ./app/Dockerfile
+      context: .
+      args:
+        - USER_NAME=${USER_NAME}
+        - USER_GROUP_NAME=${USER_GROUP_NAME}
+        - APP_ENV=${APP_ENV}
+        - APP_DIR=${APP_DIR}
+        - APP_HOST_DIR=${APP_HOST_DIR}
+    volumes:
+      - "app:${APP_DIR}"
+    logging: *logging
+    networks:
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.40"
+
+  redis:
+    image: redis:7.0-alpine
+    networks:
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.50"
+
+  # @TODO Only local/dev/test/stage env
+  mail:
+    image: schickling/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    networks:
+      internal:
+        ipv4_address: "${ENV_IP_SUBNET}.60"
