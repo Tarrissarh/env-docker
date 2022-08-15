@@ -9,14 +9,20 @@ ARG USER_GROUP_ID
 ARG API_ENV
 ARG API_DIR
 ARG API_HOST_DIR
+ARG API_REPO
+ARG GIT_EMAIL
+ARG GIT_NAME
 
-ENV USER_NAME=${USER_NAME:-"www-data"}
+ENV USER_NAME=${USER_NAME:-"tarrissarh"}
 ENV USER_ID=${USER_ID:-1000}
-ENV USER_GROUP_NAME=${USER_GROUP_NAME:-"www-data"}
+ENV USER_GROUP_NAME=${USER_GROUP_NAME:-"tarrissarh"}
 ENV USER_GROUP_ID=${USER_GROUP_ID:-1000}
 ENV API_ENV=${API_ENV:-"dev"}
 ENV API_DIR=${API_DIR:-"/api"}
 ENV API_HOST_DIR=${API_HOST_DIR:-"../projects/api"}
+ENV API_REPO=${API_REPO:-"git@github.com:Tarrissarh/api.git"}
+ENV GIT_EMAIL=${GIT_EMAIL:-"tarrissarh@gmail.com"}
+ENV GIT_NAME=${GIT_NAME:-"Tarrissarh"}
 
 # Replace http to https in repo & install apps
 RUN sed -i 's/https/http/' /etc/apk/repositories && \
@@ -27,13 +33,17 @@ RUN sed -i 's/https/http/' /etc/apk/repositories && \
         unzip \
         wget \
         git \
-        nano
+        nano \
+        openssh-client \
+        bash
 
 # Install extensions (02.08.2022 updated)
 # https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
 COPY ./api/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
         install-php-extensions \
+        apcu \
+        opcache \
         gd \
         mongodb \
         zip \
@@ -55,10 +65,8 @@ RUN if [[ ${API_ENV} == 'local' || ${API_ENV} == 'dev' ]]; then \
 ; fi
 
 # Some config for php
-RUN touch /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "upload_max_filesize = 128M;" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size = 128M;" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "memory_limit = 256M;" >> /usr/local/etc/php/conf.d/main.ini
+COPY ./api/php.ini /usr/local/etc/php/php.ini
+COPY ./api/conf.d/* /usr/local/etc/php/conf.d/
 
 # Create directory and set current permissions and owners
 RUN set -x ; \
@@ -68,9 +76,17 @@ RUN set -x ; \
     chown -R ${USER_GROUP_NAME}:${USER_NAME} ${API_DIR} && \
     rm -rf /tmp/* /var/cache/apk/*
 
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash
+RUN apk add symfony-cli
+
 WORKDIR ${API_DIR}
 
-#COPY ${API_HOST_DIR}/composer.json ./
-#RUN composer install
+USER ${USER_NAME}
+
+#RUN git clone ${API_REPO} && \
+#    composer install && \
+#    git config --global --add safe.directory ${API_DIR} && \
+#    git config --global user.email ${GIT_EMAIL} && \
+#    git config --global user.name ${GIT_NAME}
 
 CMD ["php-fpm"]

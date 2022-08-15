@@ -42,7 +42,8 @@ the appropriate docker-compose file_
 
 ## Link by default:
 
-	- http://localhost:1080/ or http://localhost:1025/ 
+- [Mailer](http://localhost:1080/)
+- [RabbitMQ management](http://localhost:15672/)
 
 Or you can add it to `/etc/hosts` under the desired domains (example for local environment):
 

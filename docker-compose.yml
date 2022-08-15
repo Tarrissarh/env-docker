@@ -51,6 +51,9 @@ services:
         - API_ENV=${API_ENV}
         - API_DIR=${API_DIR}
         - API_HOST_DIR=${API_HOST_DIR}
+        - API_REPO=${API_REPO}
+        - GIT_EMAIL=${GIT_EMAIL}
+        - GIT_NAME=${GIT_NAME}
     volumes:
       - "api:${API_DIR}"
     ports:
@@ -74,8 +77,8 @@ services:
         - ENV_PREFIX=${ENV_PREFIX}
         - API_HOST=${API_HOST}
         - APP_HOST=${APP_HOST}
-        - API_HOST_DIR=${API_HOST_DIR}
-        - APP_HOST_DIR=${APP_HOST_DIR}
+        - API_DIR=${API_DIR}
+        - APP_DIR=${APP_DIR}
     depends_on:
       - api
     volumes:
@@ -129,8 +132,6 @@ services:
     container_name: "${ENV_PREFIX}_redis"
     image: redis:7.0-alpine
     restart: always
-    env_file:
-      - .env
     logging:
       driver: none
     networks:
@@ -140,8 +141,9 @@ services:
   rabbitmq:
     container_name: "${ENV_PREFIX}_rabbitmq"
     image: rabbitmq:3.10.7-management-alpine
-    env_file:
-      - .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     restart: always
     logging:
       driver: none
@@ -154,6 +156,8 @@ services:
   # @TODO Only local/dev/test/stage env
   mail:
     image: schickling/mailcatcher
+    logging:
+      driver: none
     ports:
       - "1025:1025"
       - "1080:1080"

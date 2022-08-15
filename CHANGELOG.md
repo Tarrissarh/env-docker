@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add local ssl and documentation
 - Add gitlab CI/CD
 
+## [0.0.4] - 2022-08-15
+
+### Added
+
+- php ini configs
+
+### Changed
+
+- CHANGELOG.md
+- README.md
+- .env.sample
+- docker-compose
+
+### Removed
+
+- ...
+
+### Fixed
+
+- nginx container
+- api (php) container
+- nginx host configs
+
 ## [0.0.3] - 2022-08-12
 
 ### Added

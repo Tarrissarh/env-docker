@@ -8,18 +8,18 @@ ARG USER_ID
 ARG USER_NAME
 ARG API_HOST
 ARG APP_HOST
-ARG API_HOST_DIR
-ARG APP_HOST_DIR
+ARG API_DIR
+ARG APP_DIR
 ARG ENV_PREFIX
 
 ENV USER_GROUP_ID=${USER_GROUP_ID:-1000}
-ENV USER_GROUP_NAME=${USER_GROUP_NAME:-www-data}
-ENV USER_ID=${USER_ID:-www-data}
-ENV USER_NAME=${USER_NAME:-www-data}
+ENV USER_GROUP_NAME=${USER_GROUP_NAME:-tarrissarh}
+ENV USER_ID=${USER_ID:-1000}
+ENV USER_NAME=${USER_NAME:-tarrissarh}
 ENV API_HOST=${API_HOST:-api.tarrissarh.local}
 ENV APP_HOST=${APP_HOST:-tarrissarh.local}
-ENV API_HOST_DIR=${API_HOST_DIR:-/projects/api}
-ENV APP_HOST_DIR=${APP_HOST_DIR:-/projects/app}
+ENV API_DIR=${API_DIR:-"/api"}
+ENV APP_DIR=${APP_DIR:-"/app"}
 ENV ENV_PREFIX=${ENV_PREFIX:-tarrissarh}
 
 # Remove default project in /var/www/html & install base apps
@@ -56,8 +56,8 @@ RUN set -x ; \
     adduser -u $USER_ID -D -S -G $USER_GROUP_NAME $USER_NAME && \
     envsubst '${USER_NAME} ${USER_GROUP_NAME}' < /tmp/nginx.conf > /etc/nginx/nginx.conf && rm /tmp/nginx.conf && \
     mkdir -p /var/log/nginx/api && cd /var/log/nginx/api && touch access.log && touch error.log && \
-    envsubst '${API_HOST} ${API_HOST_DIR} ${ENV_PREFIX}' < /tmp/api.conf > /etc/nginx/conf.d/api.conf && \
+    envsubst '${API_HOST} ${API_DIR} ${ENV_PREFIX}' < /tmp/api.conf > /etc/nginx/conf.d/api.conf && \
     mkdir -p /var/log/nginx/app && cd /var/log/nginx/app && touch access.log && touch error.log && \
-    envsubst '${APP_HOST} ${APP_HOST_DIR}' < /tmp/app.conf > /etc/nginx/conf.d/app.conf
+    envsubst '${APP_HOST} ${APP_DIR}' < /tmp/app.conf > /etc/nginx/conf.d/app.conf
 
 CMD ["nginx", "-g", "daemon off;"]
