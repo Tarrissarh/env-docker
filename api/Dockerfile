@@ -35,9 +35,11 @@ RUN sed -i 's/https/http/' /etc/apk/repositories && \
         git \
         nano \
         openssh-client \
-        bash
+        bash \
+        libxslt-dev
 
 # Install extensions (02.08.2022 updated)
+RUN docker-php-ext-install xsl
 # https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
 COPY ./api/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \

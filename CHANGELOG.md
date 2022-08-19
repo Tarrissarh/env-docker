@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add local ssl and documentation
 - Add gitlab CI/CD
 
+## [0.0.5] - 2022-08-19
+
+### Added
+
+- Add php ext: xsl
+
+### Changed
+
+- ...
+
+### Removed
+
+- ...
+
+### Fixed
+
+- ...
+
 ## [0.0.4] - 2022-08-15
 
 ### Added
