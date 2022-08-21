@@ -11,11 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add local ssl and documentation
 - Add gitlab CI/CD
 
-## [0.0.5] - 2022-08-19
+## [0.0.5] - 2022-08-21
 
 ### Added
 
 - Add php ext: xsl
+- Added redirect requests from app to api for admin panel
 
 ### Changed
 
